@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+>
+
+<title>Camera Detector</title>
+
+<meta
+name="description"
+content="Camera movement and sound detection app"
+>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- HEADER -->
+<header class="top-header">
+
+<div>
+<p class="eyebrow">SECURITY CAMERA</p>
+<h1>Camera Detector</h1>
+</div>
+
+<div
+id="statusIndicator"
+class="status-indicator offline"
+>
+<span></span>
+<strong>OFFLINE</strong>
+</div>
+
+</header>
+
+
+<main class="main-content">
+
+<!-- CAMERA -->
+<section class="camera-card">
+
+<div class="camera-header">
+
+<div>
+<h2>Live Camera</h2>
+
+<p id="cameraStatus">
+Camera is not running
+</p>
+</div>
+
+<div class="recording-dot" id="recordingDot"></div>
+
+</div>
+
+
+<div class="video-wrapper">
+
+<video
+id="camera"
+autoplay
+playsinline
+muted
+></video>
+
+<canvas id="motionCanvas"></canvas>
+
+
+<div
+id="cameraOverlay"
+class="camera-overlay"
+>
+<div class="camera-message">
+<div class="camera-symbol">📷</div>
+
+<p>
+Camera is off
+</p>
+
+<button
+id="startButton"
+class="primary-button"
+>
+Start Camera
+</button>
+</div>
+</div>
+
+
+<div
+id="motionAlert"
+class="motion-alert"
+>
+🚨 MOVEMENT DETECTED
+</div>
+
+</div>
+
+
+<div class="camera-controls">
+
+<button
+id="startMonitoringButton"
+class="primary-button"
+>
+▶ Start Monitoring
+</button>
+
+<button
+id="stopMonitoringButton"
+class="secondary-button"
+disabled
+>
+■ Stop
+</button>
+
+</div>
+
+</section>
+
+
+<!-- DETECTION SETTINGS -->
+<section class="settings-card">
+
+<div class="section-title">
+
+<div>
+<h2>Detection</h2>
+
+<p>
+Choose what should trigger a photo.
+</p>
+</div>
+
+</div>
+
+
+<div class="detection-grid">
+
+<div class="detection-option">
+
+<div class="option-top">
+
+<div class="option-icon">
+🚶
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="motionEnabled"
+checked
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<h3>
+Movement
+</h3>
+
+<p>
+Detect changes in the camera image.
+</p>
+
+</div>
+
+
+<div class="detection-option">
+
+<div class="option-top">
+
+<div class="option-icon sound">
+🔊
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="soundEnabled"
+checked
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<h3>
+Sound
+</h3>
+
+<p>
+Detect loud sounds through the microphone.
+</p>
+
+</div>
+
+</div>
+
+
+<!-- SENSITIVITY -->
+
+<div class="sensitivity-section">
+
+<div class="sensitivity-heading">
+
+<label for="motionSensitivity">
+Movement Sensitivity
+</label>
+
+<strong id="motionSensitivityValue">
+25%
+</strong>
+
+</div>
+
+<input
+type="range"
+id="motionSensitivity"
+min="5"
+max="80"
+value="25"
+>
+
+</div>
+
+
+<div class="sensitivity-section">
+
+<div class="sensitivity-heading">
+
+<label for="soundSensitivity">
+Sound Sensitivity
+</label>
+
+<strong id="soundSensitivityValue">
+60%
+</strong>
+
+</div>
+
+<input
+type="range"
+id="soundSensitivity"
+min="10"
+max="100"
+value="60"
+>
+
+</div>
+
+
+<div class="cooldown-section">
+
+<label for="cooldown">
+Photo Cooldown
+</label>
+
+<select id="cooldown">
+
+<option value="3000">
+3 seconds
+</option>
+
+<option value="5000" selected>
+5 seconds
+</option>
+
+<option value="10000">
+10 seconds
+</option>
+
+<option value="30000">
+30 seconds
+</option>
+
+<option value="60000">
+1 minute
+</option>
+
+</select>
+
+</div>
+
+</section>
+
+
+<!-- LIVE LEVELS -->
+<section class="levels-card">
+
+<div class="section-title">
+
+<div>
+<h2>Live Detection</h2>
+
+<p>
+Current sensor levels.
+</p>
+</div>
+
+</div>
+
+
+<div class="level">
+
+<div class="level-label">
+
+<span>
+Movement
+</span>
+
+<strong id="motionLevelText">
+0%
+</strong>
+
+</div>
+
+<div class="level-track">
+
+<div
+id="motionLevelBar"
+class="level-fill"
+></div>
+
+</div>
+
+</div>
+
+
+<div class="level">
+
+<div class="level-label">
+
+<span>
+Sound
+</span>
+
+<strong id="soundLevelText">
+0%
+</strong>
+
+</div>
+
+<div class="level-track">
+
+<div
+id="soundLevelBar"
+class="level-fill sound-level"
+></div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- STATISTICS -->
+<section class="stats-grid">
+
+<div class="stat-card">
+
+<span>
+Detections
+</span>
+
+<strong id="detectionCount">
+0
+</strong>
+
+</div>
+
+
+<div class="stat-card">
+
+<span>
+Photos
+</span>
+
+<strong id="photoCount">
+0
+</strong>
+
+</div>
+
+
+<div class="stat-card">
+
+<span>
+Monitoring
+</span>
+
+<strong id="monitoringStatus">
+OFF
+</strong>
+
+</div>
+
+</section>
+
+
+<!-- SNAPSHOT -->
+<section class="snapshot-card">
+
+<div class="section-title">
+
+<div>
+<h2>Latest Snapshot</h2>
+
+<p>
+Most recent detection image.
+</p>
+</div>
+
+<button
+id="clearLatestButton"
+class="small-button"
+>
+Clear
+</button>
+
+</div>
+
+
+<div
+id="latestSnapshot"
+class="latest-snapshot"
+>
+
+<div class="empty-state">
+<span>📸</span>
+
+<p>
+No snapshot yet.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- HISTORY -->
+<section class="history-card">
+
+<div class="section-title">
+
+<div>
+<h2>Detection History</h2>
+
+<p id="historyCount">
+0 detections
+</p>
+</div>
+
+<button
+id="clearHistoryButton"
+class="small-button danger"
+>
+Clear History
+</button>
+
+</div>
+
+
+<div
+id="historyList"
+class="history-list"
+>
+
+<div class="empty-state">
+<span>🛡️</span>
+
+<p>
+No detections yet.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PRIVACY -->
+<section class="privacy-card">
+
+<div class="privacy-icon">
+🔒
+</div>
+
+<div>
+
+<h3>
+Privacy
+</h3>
+
+<p>
+Camera and microphone access is controlled
+by your browser. This app does not secretly
+access your devices.
+</p>
+
+</div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+<p>
+Camera Detector
+</p>
+
+<span>
+Your browser controls camera and microphone permissions.
+</span>
+
+</footer>
+
+</div>
+
+
+<!-- SNAPSHOT CANVAS -->
+<canvas
+id="snapshotCanvas"
+style="display:none;"
+></canvas>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
